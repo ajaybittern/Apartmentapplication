@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  resources :locations
+  resources :places
   #root 'listings#index'
 
   root :to => 'sessions#show'

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170418060306) do
+ActiveRecord::Schema.define(version: 20170420103853) do
 
   create_table "listings", force: :cascade do |t|
     t.float    "price"
@@ -20,8 +20,6 @@ ActiveRecord::Schema.define(version: 20170418060306) do
     t.datetime "created_at",    null: false
     t.datetime "updated_at",    null: false
     t.string   "status"
-    t.string   "latitude"
-    t.string   "longitude"
     t.integer  "streetnum"
     t.string   "country"
     t.string   "state"
@@ -35,12 +33,30 @@ ActiveRecord::Schema.define(version: 20170418060306) do
     t.integer  "unit_num"
   end
 
+  create_table "locations", force: :cascade do |t|
+    t.string   "address"
+    t.float    "latitude"
+    t.float    "longitude"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "pictures", force: :cascade do |t|
     t.datetime "created_at",   null: false
     t.datetime "updated_at",   null: false
     t.integer  "listing_id"
     t.string   "picture_json"
     t.index ["listing_id"], name: "index_pictures_on_listing_id"
+  end
+
+  create_table "places", force: :cascade do |t|
+    t.string   "city"
+    t.string   "state"
+    t.string   "country"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string   "latitude"
+    t.string   "longitude"
   end
 
   create_table "users", force: :cascade do |t|

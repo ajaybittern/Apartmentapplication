@@ -13,6 +13,7 @@ class ListingsController < ApplicationController
 
   def new
     @listing = Listing.new
+    @map_data = Place.pluck(:name, :latitude, :longitude, :country)
   end
 
   def create

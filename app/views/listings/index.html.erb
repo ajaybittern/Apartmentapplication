@@ -191,178 +191,178 @@
 
   <script type='text/javascript'>//<![CDATA[
 
-  var geocoder;
-  var map;
-  var markers = []; // array of markers
+  // var geocoder;
+  // var map;
+  // var markers = []; // array of markers
 
-  var activeNow;
+  // var activeNow;
 
-  // initialize orange marker image
-  var orangePinColor = "FF4500";
-  var orangePinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + orangePinColor,
-      new google.maps.Size(21, 34),
-      new google.maps.Point(0, 0),
-      new google.maps.Point(10, 34));
+  // // initialize orange marker image
+  // var orangePinColor = "FF4500";
+  // var orangePinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + orangePinColor,
+  //     new google.maps.Size(21, 34),
+  //     new google.maps.Point(0, 0),
+  //     new google.maps.Point(10, 34));
 
-  // initialize yellow marker image
-  var yellowPinColor = "ffff00";
-  var yellowPinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + yellowPinColor,
-      new google.maps.Size(21, 34),
-      new google.maps.Point(0, 0),
-      new google.maps.Point(10, 34));
+  // // initialize yellow marker image
+  // var yellowPinColor = "ffff00";
+  // var yellowPinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + yellowPinColor,
+  //     new google.maps.Size(21, 34),
+  //     new google.maps.Point(0, 0),
+  //     new google.maps.Point(10, 34));
 
-  var properties = [];
+  // var properties = [];
 
-  function initialize() {
-      // check if filter's search box has no value then detect users location based on his ipaddress
-      var searchBox = $("#search").val();
-      if ($.trim(searchBox).length == 0) {
-          $.get("http://ipinfo.io", function (response) {
-              $.get("http://freegeoip.net/json/"+response.ip, function(geoResponse) {
-                  city = geoResponse.city + ", " +geoResponse.region_code;
-                  if (typeof city === 'undefined' || city.length == 0) {
-                      city = "San Francisco, ca";
-                  }
-                  getListings(city);
+  // function initialize() {
+  //     // check if filter's search box has no value then detect users location based on his ipaddress
+  //     var searchBox = $("#search").val();
+  //     if ($.trim(searchBox).length == 0) {
+  //         $.get("http://ipinfo.io", function (response) {
+  //             $.get("http://freegeoip.net/json/"+response.ip, function(geoResponse) {
+  //                 city = geoResponse.city + ", " +geoResponse.region_code;
+  //                 if (typeof city === 'undefined' || city.length == 0) {
+  //                     city = "San Francisco, ca";
+  //                 }
+  //                 getListings(city);
 
-              })
+  //             })
 
-          }, "jsonp");
-      }
-  }
+  //         }, "jsonp");
+  //     }
+  // }
 
-  function getListings(city) {
-      if (typeof city === 'undefined' || city.length == 0) {
-          city = "San Francisco, ca";
-      }
+  // function getListings(city) {
+  //     if (typeof city === 'undefined' || city.length == 0) {
+  //         city = "San Francisco, ca";
+  //     }
 
-      $.getJSON('/listings/show?city='+city.split(',')[0]+"&state="+city.split(', ')[1], function (json) {
+  //     $.getJSON('/listings/show?city='+city.split(',')[0]+"&state="+city.split(', ')[1], function (json) {
 
-          // creating deep copy of returned jsonq
-          properties = JSON.parse(JSON.stringify(json));
+  //         // creating deep copy of returned jsonq
+  //         properties = JSON.parse(JSON.stringify(json));
 
-          var template = $('#properties-listing').html();
-          var context = {
-              data: properties
-          };
-          Handlebars.registerHelper("inc", function (value, options) {
-              return parseInt(value) + 1;
-          });
+  //         var template = $('#properties-listing').html();
+  //         var context = {
+  //             data: properties
+  //         };
+  //         Handlebars.registerHelper("inc", function (value, options) {
+  //             return parseInt(value) + 1;
+  //         });
 
-          map = new google.maps.Map(document.getElementById('map-canvas'), {
-              mapTypeId: google.maps.MapTypeId.ROADMAP
-          });
-
-
-          // markers will be shown on map for these coordinates
-          var bounds = new google.maps.LatLngBounds();
-
-          var templateScript = Handlebars.compile(template);
-          var html = templateScript(context);
-
-          $('#property-list ul').append(html);
+  //         map = new google.maps.Map(document.getElementById('map-canvas'), {
+  //             mapTypeId: google.maps.MapTypeId.ROADMAP
+  //         });
 
 
-          properties.forEach(function (property, index) {
-              // to begin with all markers will be in orange color
-              var marker = new google.maps.Marker({
-                  position: new google.maps.LatLng(properties[index].latitude, properties[index].longitude),
-                  map: map,
-                  icon: orangePinImage
-              });
-              // markers will have id corresponding to their position in markers array
-              marker.set("id", index + 1);
+  //         // markers will be shown on map for these coordinates
+  //         var bounds = new google.maps.LatLngBounds();
 
-              // when mouse is over a marker it will turn yellow
-              google.maps.event.addListener(marker, 'mouseover', function () {
-                  marker.setIcon(yellowPinImage);
-              });
+  //         var templateScript = Handlebars.compile(template);
+  //         var html = templateScript(context);
 
-              //when the mouse goes out of the marker, it will turn orange if it is not a marker which was clicked on (activeNow)
-              google.maps.event.addListener(marker, 'mouseout', function () {
-                  if (marker.get("id") != activeNow) {
-                      marker.setIcon(orangePinImage);
-                  }
-              });
+  //         $('#property-list ul').append(html);
 
-              // when a marker is clicked the corresponding property in the list will be scrolled to and marked with a blue border
-              google.maps.event.addListener(marker, 'click', function () {
-                  // inactivate the property and marker activated before the current marker was clicked
-                  if (typeof activeNow != 'undefined') {
-                      markers[activeNow - 1].setIcon(orangePinImage);
-                      $('#property-list li:nth-child(' + markers[activeNow - 1].get("id") + ')').css('outline', '');
-                  }
-                  // scroll to property corresponding to the marker (use jquery for animation)
-                  $('#property-list').animate({
-                      scrollTop: $('#property-list li:nth-child(' + marker.get("id") + ')').position().top - $('#property-list li:first').position().top
-                  }, 'slow');
 
-                  // add blue border
-                  $('#property-list ul').find(".list-group-item-success").removeClass("list-group-item-success");
-                  $('#property-list ul li:nth-child(' + marker.get("id") + ')').addClass("list-group-item-success");
+  //         properties.forEach(function (property, index) {
+  //             // to begin with all markers will be in orange color
+  //             var marker = new google.maps.Marker({
+  //                 position: new google.maps.LatLng(properties[index].latitude, properties[index].longitude),
+  //                 map: map,
+  //                 icon: orangePinImage
+  //             });
+  //             // markers will have id corresponding to their position in markers array
+  //             marker.set("id", index + 1);
 
-                  activeNow = marker.get("id");
-              });
+  //             // when mouse is over a marker it will turn yellow
+  //             google.maps.event.addListener(marker, 'mouseover', function () {
+  //                 marker.setIcon(yellowPinImage);
+  //             });
 
-              markers.push(marker);
-              bounds.extend(marker.position);
-          });
-          // position the map so that all markers are visible (only when search box is not empty)
-          map.fitBounds(bounds);
+  //             //when the mouse goes out of the marker, it will turn orange if it is not a marker which was clicked on (activeNow)
+  //             google.maps.event.addListener(marker, 'mouseout', function () {
+  //                 if (marker.get("id") != activeNow) {
+  //                     marker.setIcon(orangePinImage);
+  //                 }
+  //             });
 
-          // if search box is empty when map is initialized, we should set the center of the map as below
-          var searchBox = $("#search");
-          if ($.trim(searchBox.val()).length == 0) {
-              searchBox.val(city);
-              var geocoder =  new google.maps.Geocoder();
-              geocoder.geocode( { 'address': city}, function(results, status) {
-                  if (status == google.maps.GeocoderStatus.OK) {
-                      initialLocation = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
-                      map.setCenter(initialLocation);
-                  } else {
-                      console.log("Something went wrong while trying to get lat lon for city - " + city + " status - " + status);
-                      geocoder.geocode( { 'address': 'San Francisco, CA'}, function(results, status) {
-                          if (status == google.maps.GeocoderStatus.OK) {
-                              initialLocation = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
-                              map.setCenter(initialLocation);
-                          } else {
-                              console.log("Something went wrong while trying to get lat lon for San Francisco also - " + status);
-                          }
-                      })
-                  }
-                  map.fitBounds(results[0].geometry.viewport);
-              });
-          }
+  //             // when a marker is clicked the corresponding property in the list will be scrolled to and marked with a blue border
+  //             google.maps.event.addListener(marker, 'click', function () {
+  //                 // inactivate the property and marker activated before the current marker was clicked
+  //                 if (typeof activeNow != 'undefined') {
+  //                     markers[activeNow - 1].setIcon(orangePinImage);
+  //                     $('#property-list li:nth-child(' + markers[activeNow - 1].get("id") + ')').css('outline', '');
+  //                 }
+  //                 // scroll to property corresponding to the marker (use jquery for animation)
+  //                 $('#property-list').animate({
+  //                     scrollTop: $('#property-list li:nth-child(' + marker.get("id") + ')').position().top - $('#property-list li:first').position().top
+  //                 }, 'slow');
 
-          loadCityLimits();
+  //                 // add blue border
+  //                 $('#property-list ul').find(".list-group-item-success").removeClass("list-group-item-success");
+  //                 $('#property-list ul li:nth-child(' + marker.get("id") + ')').addClass("list-group-item-success");
 
-      });
-  }
+  //                 activeNow = marker.get("id");
+  //             });
 
-  // call initialize method to load map on window load
-  google.maps.event.addDomListener(window, "load", initialize);
+  //             markers.push(marker);
+  //             bounds.extend(marker.position);
+  //         });
+  //         // position the map so that all markers are visible (only when search box is not empty)
+  //         map.fitBounds(bounds);
 
-  // called when mouse goes on or out of a property in the property list
-  showme = function (index) {
+  //         // if search box is empty when map is initialized, we should set the center of the map as below
+  //         var searchBox = $("#search");
+  //         if ($.trim(searchBox.val()).length == 0) {
+  //             searchBox.val(city);
+  //             var geocoder =  new google.maps.Geocoder();
+  //             geocoder.geocode( { 'address': city}, function(results, status) {
+  //                 if (status == google.maps.GeocoderStatus.OK) {
+  //                     initialLocation = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+  //                     map.setCenter(initialLocation);
+  //                 } else {
+  //                     console.log("Something went wrong while trying to get lat lon for city - " + city + " status - " + status);
+  //                     geocoder.geocode( { 'address': 'San Francisco, CA'}, function(results, status) {
+  //                         if (status == google.maps.GeocoderStatus.OK) {
+  //                             initialLocation = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+  //                             map.setCenter(initialLocation);
+  //                         } else {
+  //                             console.log("Something went wrong while trying to get lat lon for San Francisco also - " + status);
+  //                         }
+  //                     })
+  //                 }
+  //                 map.fitBounds(results[0].geometry.viewport);
+  //             });
+  //         }
 
-      // inactivate the property and marker activated before the current marker was clicked
-      if (typeof activeNow != 'undefined') {
-          markers[activeNow - 1].setIcon(orangePinImage);
-          $('#property-list li:nth-child(' + markers[activeNow - 1].get("id") + ')').css('outline', '');
-      }
+  //         loadCityLimits();
 
-      if (markers[index].getAnimation() != google.maps.Animation.BOUNCE) {
-          // make marker bounce
-          markers[index].setAnimation(google.maps.Animation.BOUNCE);
-          // make marker turn yellow
-          markers[index].setIcon(yellowPinImage);
-      } else {
-          // make marker orange
-          markers[index].setIcon(orangePinImage);
-          // stop bouncing
-          markers[index].setAnimation(null);
-      }
-  }
+  //     });
+  // }
+
+  // // call initialize method to load map on window load
+  // google.maps.event.addDomListener(window, "load", initialize);
+
+  // // called when mouse goes on or out of a property in the property list
+  // showme = function (index) {
+
+  //     // inactivate the property and marker activated before the current marker was clicked
+  //     if (typeof activeNow != 'undefined') {
+  //         markers[activeNow - 1].setIcon(orangePinImage);
+  //         $('#property-list li:nth-child(' + markers[activeNow - 1].get("id") + ')').css('outline', '');
+  //     }
+
+  //     if (markers[index].getAnimation() != google.maps.Animation.BOUNCE) {
+  //         // make marker bounce
+  //         markers[index].setAnimation(google.maps.Animation.BOUNCE);
+  //         // make marker turn yellow
+  //         markers[index].setIcon(yellowPinImage);
+  //     } else {
+  //         // make marker orange
+  //         markers[index].setIcon(orangePinImage);
+  //         // stop bouncing
+  //         markers[index].setAnimation(null);
+  //     }
+  // }
   //]]>
 
   </script>
@@ -380,14 +380,18 @@
   </div>
   <div class="navbar-collapse collapse">
     <ul class="nav navbar-nav">
-      <li class="active"><a href="#">Add a Listing</a></li>
+      <li class="active"><a href="/places/new">Add a Listing</a></li>
       <li><a href="#">Manage Listings</a></li>
+       <li><%#= select "country", Place.all.map{|place| place.country},:class=>"active" %>
+</li>
+
+
     </ul>
 
   </div>
 </div>
 
-<div id="map-canvas" class="hidden-xs hidden-sm"></div>
+<div id="map-canvasss" class="hidden-xs hidden-sm"></div>
 <div class="container-fluid" id="main">
   <div class="row">
     <div class="col-xs-1 col-sm-1 hidden-md hidden-lg"></div>
@@ -477,8 +481,11 @@
         </ul>
       </div>
 
-      <div class="col-xs-8"><!--map-canvas will be postioned here--></div>
+      <div class="col-xs-8">
+
+      <!--map-canvas will be postioned here--></div>
     </div>
+  </div>
   </div>
   <!-- end template -->
 
@@ -519,3 +526,13 @@
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+

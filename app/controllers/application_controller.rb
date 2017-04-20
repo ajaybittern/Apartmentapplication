@@ -1,6 +1,24 @@
 class ApplicationController < ActionController::Base
+  # protect_from_forgery with: :null_session, if: Proc.new { |c| c.request.format.include? 'application/json' }
+  # protect_from_forgery with: :null_session, if: ->{request.format.json?}
+  # skip_before_action :verify_authenticity_token
+  # protect_from_forgery with: :null_session
+  # protect_from_forgery with: :null_session, if: Proc.new { |c| c.request.format == 'application/json' }
+  # skip_before_filter  :verify_authenticity_token
   protect_from_forgery with: :exception
+  helper_method :resource_name, :resource, :devise_mapping
 
+  def resource_name
+    :user
+  end
+ 
+  def resource
+    @resource ||= User.new
+  end
+ 
+  def devise_mapping
+    @devise_mapping ||= Devise.mappings[:user]
+  end
   private
 
   def logged_in?

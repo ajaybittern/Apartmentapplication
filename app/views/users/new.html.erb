@@ -1,4 +1,4 @@
-<h1> Create New Account </h1>
+
 <% if @user.errors.any? %>
     <div id="error_explanation">
       <ul>
@@ -11,29 +11,436 @@
     </div>
 <%end%>
 
-<%= simple_form_for @user, as: :user, url: '/signup' do |f| %>
-    <div class="field">
-      <%= f.label :name %><br />
-      <%= f.text_field :name %>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>ApartmentSearch</title>
+  <meta name="generator" content="Bootply"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <!--[if lt IE 9]>
+  <script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <!--link href="css/styles.css" rel="stylesheet"-->
+  <!-- script references -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCn08ZfcJ6WvhUEzB-SUICMYcFxrEF6-V8&libraries=places"></script>
+  <!--script src="js/scripts.js"></script-->
+
+  <!-- load handlebars.js from cdn, this is used for js templating-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.6/handlebars.js"></script>
+
+  <script src="https://use.fontawesome.com/44e70c01df.js"></script>
+
+  <%= javascript_include_tag "map-boundries/relation-in-order.js" %>
+  <%= javascript_include_tag "map-boundries/utility-functions.js" %>
+  <%= javascript_include_tag "map-boundries/google.maps.Polygon.getBounds.js" %>
+  <%= javascript_include_tag "map-boundries/city-boundaries-googlemaps.js" %>
+
+  <style>
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      padding-top: 50px; /*padding for navbar*/
+    }
+
+    #sidebar {
+      max-height: 10%;
+    }
+
+    #property-list {
+      max-height: 90%;
+      padding: 0px;
+    }
+
+    @media only screen and (min-width: 992px) {
+      #property-list {
+        max-height: 90%;
+        overflow-y: scroll;
+
+      }
+    }
+
+    .list-group-item {
+      border: 0px;
+    }
+
+    .list-group {
+      padding-top: 2px;
+      padding-bottom: 2px;
+      padding-right: 2px;
+    }
+
+    .navbar-custom .icon-bar {
+      background-color: #fff;
+    }
+
+    .navbar-custom {
+      background-color: #168ccc;
+      color: #fff;
+    }
+
+    .navbar-custom li > a:hover, .navbar-custom li > a:focus {
+      background-color: #49bfff;
+    }
+
+    .navbar-custom a {
+      color: #fefefe;
+    }
+
+    .navbar-custom .form-control:focus {
+      border-color: #49bfff;
+      outline: 0;
+      -webkit-box-shadow: inset 0 0 0;
+      box-shadow: inset 0 0 0;
+    }
+
+    #main, #main > .row {
+      height: 100%;
+    }
+
+    #main > .row {
+      overflow-y: scroll;
+    }
+
+    #left {
+      height: 100%;
+    }
+
+    #map-canvas {
+      width: 74.97%;
+      height: calc(100% - 0);
+      position: absolute;
+      right: 16px;
+      top: 50px;
+      bottom: 0;
+      overflow: hidden;
+    }
+
+    .listings-grid__attrs {
+      margin: 0;
+      list-style: none;
+      padding: 13px 12px 13px 18px;
+      border-top: 1px solid rgba(0,0,0,.04);
+    }
+
+    .listings-grid__attrs>li {
+      display: inline-block;
+      vertical-align: top;
+      padding: 0;
+      font-size: 13px;
+      font-weight: 500;
+      color: #828282;
+      margin-right: 13px;
+    }
+
+    .label-grey-100 {
+      background-color: #f5f5f5;
+      color: #9e9e9e;
+    }
+
+    .dropdown-menu {
+      min-width: 289px;
+
+      margin-top: -1px;
+
+      padding: 4px 15px;
+
+    }
+
+    .btn-group .btn {
+
+      border-radius: 0;
+
+      margin-left: -1px;
+
+    }
+
+    .form-horizontal .form-group {
+
+      margin-left: 0;
+
+      margin-right: 0;
+
+    }
+
+    .search-box-style {
+
+      padding: 9px;
+
+      border: solid 1px #408080;
+
+      outline: 0;
+
+      background: -webkit-gradient(linear, left top, left 25, from(#FFFFFF), color-stop(4%, #A4FFA4), to(#FFFFFF));
+
+      background: -moz-linear-gradient(top, #FFFFFF, #A4FFA4 1px, #FFFFFF 25px);
+
+      box-shadow: rgba(0, 64, 64, 0.3) 0px 0px 8px;
+
+      -moz-box-shadow: rgba(0, 64, 64, 0.3) 0px 0px 8px;
+
+      -webkit-box-shadow: rgba(0, 64, 64, 0.3) 0px 0px 8px;;
+
+    }
+
+    @media screen and (min-width: 768px) {
+
+      #boot-search-box {
+
+        width: 500px;
+
+        margin: 0 auto;
+
+      }
+
+    }
+  </style>
+
+  <script type='text/javascript'>//<![CDATA[
+
+  var geocoder;
+  var map;
+  var markers = []; // array of markers
+
+  var activeNow;
+
+  // initialize orange marker image
+  var orangePinColor = "FF4500";
+  var orangePinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + orangePinColor,
+      new google.maps.Size(21, 34),
+      new google.maps.Point(0, 0),
+      new google.maps.Point(10, 34));
+
+  // initialize yellow marker image
+  var yellowPinColor = "ffff00";
+  var yellowPinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + yellowPinColor,
+      new google.maps.Size(21, 34),
+      new google.maps.Point(0, 0),
+      new google.maps.Point(10, 34));
+
+  var properties = [];
+
+  function initialize() {
+      // check if filter's search box has no value then detect users location based on his ipaddress
+      var searchBox = $("#search").val();
+      if ($.trim(searchBox).length == 0) {
+          $.get("http://ipinfo.io", function (response) {
+              $.get("http://freegeoip.net/json/"+response.ip, function(geoResponse) {
+                  city = geoResponse.city + ", " +geoResponse.region_code;
+                  if (typeof city === 'undefined' || city.length == 0) {
+                      city = "San Francisco, ca";
+                  }
+                  getListings(city);
+
+              })
+
+          }, "jsonp");
+      }
+  }
+
+  function getListings(city) {
+      if (typeof city === 'undefined' || city.length == 0) {
+          city = "San Francisco, ca";
+      }
+
+      $.getJSON('/listings/show?city='+city.split(',')[0]+"&state="+city.split(', ')[1], function (json) {
+
+          // creating deep copy of returned jsonq
+          properties = JSON.parse(JSON.stringify(json));
+
+          var template = $('#properties-listing').html();
+          var context = {
+              data: properties
+          };
+          Handlebars.registerHelper("inc", function (value, options) {
+              return parseInt(value) + 1;
+          });
+
+          map = new google.maps.Map(document.getElementById('map-canvas'), {
+              mapTypeId: google.maps.MapTypeId.ROADMAP
+          });
+
+
+          // markers will be shown on map for these coordinates
+          var bounds = new google.maps.LatLngBounds();
+
+          var templateScript = Handlebars.compile(template);
+          var html = templateScript(context);
+
+          $('#property-list ul').append(html);
+
+
+          properties.forEach(function (property, index) {
+              // to begin with all markers will be in orange color
+              var marker = new google.maps.Marker({
+                  position: new google.maps.LatLng(properties[index].latitude, properties[index].longitude),
+                  map: map,
+                  icon: orangePinImage
+              });
+              // markers will have id corresponding to their position in markers array
+              marker.set("id", index + 1);
+
+              // when mouse is over a marker it will turn yellow
+              google.maps.event.addListener(marker, 'mouseover', function () {
+                  marker.setIcon(yellowPinImage);
+              });
+
+              //when the mouse goes out of the marker, it will turn orange if it is not a marker which was clicked on (activeNow)
+              google.maps.event.addListener(marker, 'mouseout', function () {
+                  if (marker.get("id") != activeNow) {
+                      marker.setIcon(orangePinImage);
+                  }
+              });
+
+              // when a marker is clicked the corresponding property in the list will be scrolled to and marked with a blue border
+              google.maps.event.addListener(marker, 'click', function () {
+                  // inactivate the property and marker activated before the current marker was clicked
+                  if (typeof activeNow != 'undefined') {
+                      markers[activeNow - 1].setIcon(orangePinImage);
+                      $('#property-list li:nth-child(' + markers[activeNow - 1].get("id") + ')').css('outline', '');
+                  }
+                  // scroll to property corresponding to the marker (use jquery for animation)
+                  $('#property-list').animate({
+                      scrollTop: $('#property-list li:nth-child(' + marker.get("id") + ')').position().top - $('#property-list li:first').position().top
+                  }, 'slow');
+
+                  // add blue border
+                  $('#property-list ul').find(".list-group-item-success").removeClass("list-group-item-success");
+                  $('#property-list ul li:nth-child(' + marker.get("id") + ')').addClass("list-group-item-success");
+
+                  activeNow = marker.get("id");
+              });
+
+              markers.push(marker);
+              bounds.extend(marker.position);
+          });
+          // position the map so that all markers are visible (only when search box is not empty)
+          map.fitBounds(bounds);
+
+          // if search box is empty when map is initialized, we should set the center of the map as below
+          var searchBox = $("#search");
+          if ($.trim(searchBox.val()).length == 0) {
+              searchBox.val(city);
+              var geocoder =  new google.maps.Geocoder();
+              geocoder.geocode( { 'address': city}, function(results, status) {
+                  if (status == google.maps.GeocoderStatus.OK) {
+                      initialLocation = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+                      map.setCenter(initialLocation);
+                  } else {
+                      console.log("Something went wrong while trying to get lat lon for city - " + city + " status - " + status);
+                      geocoder.geocode( { 'address': 'San Francisco, CA'}, function(results, status) {
+                          if (status == google.maps.GeocoderStatus.OK) {
+                              initialLocation = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+                              map.setCenter(initialLocation);
+                          } else {
+                              console.log("Something went wrong while trying to get lat lon for San Francisco also - " + status);
+                          }
+                      })
+                  }
+                  map.fitBounds(results[0].geometry.viewport);
+              });
+          }
+
+          loadCityLimits();
+
+      });
+  }
+
+  // call initialize method to load map on window load
+  google.maps.event.addDomListener(window, "load", initialize);
+
+  // called when mouse goes on or out of a property in the property list
+  showme = function (index) {
+
+      // inactivate the property and marker activated before the current marker was clicked
+      if (typeof activeNow != 'undefined') {
+          markers[activeNow - 1].setIcon(orangePinImage);
+          $('#property-list li:nth-child(' + markers[activeNow - 1].get("id") + ')').css('outline', '');
+      }
+
+      if (markers[index].getAnimation() != google.maps.Animation.BOUNCE) {
+          // make marker bounce
+          markers[index].setAnimation(google.maps.Animation.BOUNCE);
+          // make marker turn yellow
+          markers[index].setIcon(yellowPinImage);
+      } else {
+          // make marker orange
+          markers[index].setIcon(orangePinImage);
+          // stop bouncing
+          markers[index].setAnimation(null);
+      }
+  }
+  //]]>
+
+  </script>
+
+<%= form_for(resource, as: resource_name, url: '/signup') do |f| %>
+    <div class="row">
+        <div class="container">
+            <div id="loginbox" class="mainbox col-md-6 col-md-offset-3 col-sm-7 col-sm-offset-2 allSides box-outernew">
+                <div class="panel panel-info ">
+                    <div class="panel-heading">
+                        <div class="panel-title font-bold">Sign Up</div>
+                        <div class="panel-head"></div>
+                    </div>
+
+                    <div class="panel-body panel-bodylogin-signin">
+
+                        <div style="display:none" id="login-alert" class="alert alert-danger col-sm-12"></div>
+                        <%= simple_form_for(resource, as: resource_name, :id=>"loginform", :class=>"form-horizontal", url: '/signup') do |f| %>
+
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-5 control-label">Name</label>
+                                        <div class="col-sm-7">
+                                            <input type="text" class="form-control  " id="inputEmail3" autofocus="true" name="user[name]" placeholder="name" required>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <br>
+                                     <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-5 control-label">phone Number</label>
+                                        <div class="col-sm-7">
+                                            <input type="text" class="form-control  " id="inputEmail4" autofocus="true" name="user[phoneNum]" placeholder="phone Number" required>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <br>
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-5 control-label">Password</label>
+                                        <div class="col-sm-7">
+                                            <input type="password" class="form-control " id="inputEmail5" name="user[password]" placeholder="password">
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <br>
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-5 control-label">Password Confirmation</label>
+                                        <div class="col-sm-7">
+                                            <input type="password" class="form-control " id="inputEmail6" name="user[password_confirmation]" placeholder="password confirmation">
+                                        </div>
+                                    </div>
+                                  
+                              
+                              
+
+                                    <div class="form-group ">
+                                        <div class="col-sm-7 ">
+                                            <br>
+                                            <%= f.submit "Sign Up", :class=>"btn btn-primary "%>
+                                        </div>
+                                    </div>
+                            </div>
+
+                            <% end %>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="field">
-      <%= f.label :phoneNum, 'Phone Number' %><br />
-      <%= f.text_field :phoneNum %>
-    </div>
-
-    <div class="field">
-      <%= f.label :password %><br />
-      <%= f.password_field :password %>
-    </div>
-
-    <div class="field">
-      <%= f.label :password_confirmation %><br />
-      <%= f.password_field :password_confirmation %>
-    </div>
-
-    <div class="actions"><%= f.submit "Sign Up" %></div>
-
-<% end %>
-
-
+    <% end %>
+        <br>
+        <br>
