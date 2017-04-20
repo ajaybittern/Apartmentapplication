@@ -19,11 +19,16 @@ class ApplicationController < ActionController::Base
   def devise_mapping
     @devise_mapping ||= Devise.mappings[:user]
   end
+
+  def current_user
+    @current_user ||=  User.find_by(name: session[:name]) if session[:name]
+  end
+  helper_method :current_user
   private
 
   def logged_in?
     @current_user ||= User.find_by(name: session[:name])
-    return session[:name] != nil
+    # return session[:name] != nil
   end
 
   helper_method :logged_in?
