@@ -13,7 +13,7 @@ class UsersController < ApplicationController
     @user = User.new(allowed_params)
     if @user.save
       #session[:name] = @user.name
-      redirect_to action: 'index'
+      redirect_to action: 'listings/index'
     else
       render 'new'
     end
