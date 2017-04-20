@@ -9,6 +9,7 @@ development:
   encoding: utf8
   database: apartment_development
   pool: 5
+  timeout: 5000
 
 test:
   adapter: sqlite3
@@ -21,3 +22,5 @@ production:
   encoding: utf8
   database: pg_production
   pool: 5
+  timeout: 5000
+
