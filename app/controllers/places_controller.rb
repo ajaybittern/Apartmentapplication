@@ -11,7 +11,7 @@ class PlacesController < ApplicationController
   # GET /places/1
   # GET /places/1.json
   def show
-     @map_data = Place.pluck(:name, :latitude, :longitude, :country)
+     @map_data = Place.pluck(:city, :latitude, :longitude, :country)
   end
 
   # GET /places/new
