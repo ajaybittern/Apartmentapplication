@@ -12,7 +12,7 @@
   <![endif]-->
   <!--link href="css/styles.css" rel="stylesheet"-->
   <!-- script references -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+<!--   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script> -->
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCn08ZfcJ6WvhUEzB-SUICMYcFxrEF6-V8&libraries=places"></script>
   <!--script src="js/scripts.js"></script-->
@@ -24,7 +24,7 @@
 
   <%= javascript_include_tag "map-boundries/relation-in-order.js" %>
   <%= javascript_include_tag "map-boundries/utility-functions.js" %>
-  <%= javascript_include_tag "map-boundries/google.maps.Polygon.getBounds.js" %>
+  <%#= javascript_include_tag "map-boundries/google.maps.Polygon.getBounds.js" %>
   <%= javascript_include_tag "map-boundries/city-boundaries-googlemaps.js" %>
 
   <style>
@@ -384,90 +384,9 @@
       <li><a href="#">Manage Listings</a></li>
        <li><%#= select "country", Place.all.map{|place| place.country},:class=>"active" %>
 </li>
-
-
     </ul>
-
   </div>
 </div>
-<div id="main">
-    <head>
-
-<style type="text/css">
-  html { height: 100% }
-  body { height: 100%; margin: 0; padding: 0 }
-  #map_canvas { height: 100% }
-</style>
-<script type="text/javascript"
-  src=
-"http://maps.googleapis.com/maps/api/js?key=AIzaSyB1tbIAqN0XqcgTR1-          FxYoVTVq6Is6lD98&sensor=false">
-</script>
-<script type="text/javascript">
-
-var locations =<%=raw @map_data.to_json%>;
-
-  function initialize() {
-
-    var myOptions = {
-      center: new google.maps.LatLng(33.890542, 151.274856),
-      zoom: 12,
-      mapTypeId: google.maps.MapTypeId.ROADMAP
-
-    };
-    var map = new google.maps.Map(document.getElementById("default"),
-        myOptions);
-
-    setMarkers(map,locations)
-
-  }
-
-
-
-  function setMarkers(map,locations){
-
-      var marker, i
-
-for (i = 0; i < locations.length; i++)
- {  
-
- var loan = locations[i][0]
- var lat = locations[i][1]
- var long = locations[i][2]
- var add =  locations[i][3]
-
- latlngset = new google.maps.LatLng(lat, long);
-
-  var marker = new google.maps.Marker({  
-          map: map, title: loan , position: latlngset  
-        });
-        map.setCenter(marker.getPosition())
-
-
-        var content = "Loan Number: " + loan +  '</h3>' + "Address: " + add     
-
-  var infowindow = new google.maps.InfoWindow()
-
-google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){ 
-        return function() {
-           infowindow.setContent(content);
-           infowindow.open(map,marker);
-        };
-    })(marker,content,infowindow)); 
-
-  }
-  }
-  </script>
- <body onload="initialize()">
-  <div id="default" style="width:1000px; height:725px; left: 30%; "></div>
- </body>
-  </html>
-
- </head>
-
-  
-  </div>
-
-
 <div id="map-canvasss" class="hidden-xs hidden-sm"></div>
 <div class="container-fluid" id="main">
   <div class="row">
@@ -561,7 +480,82 @@ google.maps.event.addListener(marker,'click', (function(marker,content,infowindo
       <div class="col-xs-8">
 
       <!--map-canvas will be postioned here--></div>
+
+
     </div>
+    <head>
+
+<style type="text/css">
+  html { height: 100% }
+  body { height: 100%; margin: 0; padding: 0 }
+  #map_canvas { height: 100% }
+</style>
+<script type="text/javascript"
+  src=
+"http://maps.googleapis.com/maps/api/js?key=AIzaSyB1tbIAqN0XqcgTR1-          FxYoVTVq6Is6lD98&sensor=false">
+</script>
+<script type="text/javascript">
+
+var locations =<%=raw @map_data.to_json%>;
+
+  function initialize() {
+
+    var myOptions = {
+      center: new google.maps.LatLng(33.890542, 151.274856),
+      zoom: 12,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+
+    };
+    var map = new google.maps.Map(document.getElementById("default"),
+        myOptions);
+
+    setMarkers(map,locations)
+
+  }
+
+
+
+  function setMarkers(map,locations){
+
+      var marker, i
+
+for (i = 0; i < locations.length; i++)
+ {  
+
+ var loan = locations[i][0]
+ var lat = locations[i][1]
+ var long = locations[i][2]
+ var add =  locations[i][3]
+
+ latlngset = new google.maps.LatLng(lat, long);
+
+  var marker = new google.maps.Marker({  
+          map: map, title: loan , position: latlngset  
+        });
+        map.setCenter(marker.getPosition())
+
+
+        var content = "Loan Number: " + loan +  '</h3>' + "Address: " + add     
+
+  var infowindow = new google.maps.InfoWindow()
+
+google.maps.event.addListener(marker,'click', (function(marker,content,infowindow){ 
+        return function() {
+           infowindow.setContent(content);
+           infowindow.open(map,marker);
+        };
+    })(marker,content,infowindow)); 
+
+  }
+  }
+  </script>
+ <body onload="initialize()">
+  <div id="default" style="width:1055px; height:680px; left: 0%; "></div>
+ </body>
+  </html>
+
+ </head>
+
   </div>
   </div>
   <!-- end template -->
