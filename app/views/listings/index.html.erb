@@ -370,23 +370,7 @@
 </head>
 <body>
 <!-- begin template -->
-<div class="navbar navbar-custom navbar-fixed-top">
-  <div class="navbar-header"><a class="navbar-brand" href="#">Apartment Search</a>
-    <a class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-      <span class="icon-bar"></span>
-    </a>
-  </div>
-  <div class="navbar-collapse collapse">
-    <ul class="nav navbar-nav">
-      <li class="active"><a href="/places/new">Add a Listing</a></li>
-      <li><a href="#">Manage Listings</a></li>
-       <li><%#= select "country", Place.all.map{|place| place.country},:class=>"active" %>
-</li>
-    </ul>
-  </div>
-</div>
+<%= render "layouts/header"%>
 <div id="map-canvasss" class="hidden-xs hidden-sm"></div>
 <div class="container-fluid" id="main">
   <div class="row">
@@ -502,7 +486,7 @@ var locations =<%=raw @map_data.to_json%>;
 
     var myOptions = {
       center: new google.maps.LatLng(33.890542, 151.274856),
-      zoom: 12,
+      zoom: 8,
       mapTypeId: google.maps.MapTypeId.ROADMAP
 
     };
@@ -550,7 +534,7 @@ google.maps.event.addListener(marker,'click', (function(marker,content,infowindo
   }
   </script>
  <body onload="initialize()">
-  <div id="default" style="width:1055px; height:680px; left: 0%; "></div>
+  <div id="default" style="width:800px; height:680px; "></div>
  </body>
   </html>
 
