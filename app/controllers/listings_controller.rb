@@ -1,6 +1,8 @@
 class ListingsController < ApplicationController
-  def index
 
+
+  def index
+    @map_data = Listing.pluck(:city, :latitude, :longitude)
   end
 
   def show
@@ -13,14 +15,16 @@ class ListingsController < ApplicationController
 
   def new
     @listing = Listing.new
-    @map_data = Place.pluck(:name, :latitude, :longitude, :country)
+    # @map_data = Place.pluck(:name, :latitude, :longitude, :country)
   end
 
   def create
     @listing = Listing.new(listing_params)
       if @listing.save
-        params[:listing]['pictures'].each do |file|
-          @listing.pictures.create!(:picture_json => file)
+        if params[:listing]['pictures'].present?
+          params[:listing]['pictures'].each do |file|
+            @listing.pictures.create!(:picture_json => file)
+          end
         end
           flash[:notice] = "Listing added successfully!"
           redirect_to '/apartments'

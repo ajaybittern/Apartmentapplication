@@ -13,7 +13,8 @@ class UsersController < ApplicationController
     @user = User.new(allowed_params)
     if @user.save
       #session[:name] = @user.name
-      redirect_to action: 'listings/index'
+      flash[:notice] = "User created!"
+      redirect_to root_url
     else
       render 'new'
     end
